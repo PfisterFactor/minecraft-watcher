@@ -16,7 +16,7 @@ lazy_static! {
 }
 
 #[derive(Clone, Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(about, long_about = None)]
 struct Args {
     /// EC2 Instance ID to monitor
     #[arg(long,required = true)]

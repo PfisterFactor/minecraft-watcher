@@ -9,6 +9,8 @@ use crate::{CLI_ARGS, server_util};
 use crate::types::ServerStatus;
 use anyhow::Result;
 
+/// Background task to shutdown the server if it is inactive
+/// * `inactivity_counter` - current minutes the server has been inactive for
 async fn shutdown_server_if_inactive_task(inactivity_counter: &mut u32) {
     log::info!("[PERIODIC SERVER CHECK START]");
     let aws_credentials = aws_config::load_defaults(BehaviorVersion::latest()).await;
@@ -43,6 +45,7 @@ async fn shutdown_server_if_inactive_task(inactivity_counter: &mut u32) {
 
 }
 
+/// Start up the server watcher in a background thread
 pub async fn start_watcher() -> Result<()> {
     let sched = JobScheduler::new().await?;
     sched.add(
