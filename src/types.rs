@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 
+/// Potential states the Minecraft server could be in
 #[derive(Copy, Clone, PartialEq)]
 pub enum ServerStatus {
     Offline,
@@ -21,6 +22,7 @@ impl ServerStatus {
             ServerStatus::Unknown => "Unknown"
         }
     }
+    /// Get a Minecraft MOTD message to display for the state of the server
     pub fn get_motd(&self) -> &'static str {
         match self {
             ServerStatus::Offline => "&4Offline &f&o(join to start server up)",
