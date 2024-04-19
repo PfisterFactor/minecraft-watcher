@@ -4,6 +4,7 @@ mod server_util;
 mod status_reporter;
 mod server_watcher;
 
+use std::error::Error;
 use anyhow::{Result};
 use clap::Parser;
 use lazy_static::lazy_static;
@@ -49,15 +50,23 @@ async fn main() -> Result<()> {
     let listener = TcpListener::bind("0.0.0.0:".to_string() + &port.to_string()).await?;
     log::info!("Minecraft status reporter bound to TCP port {}", port);
     loop {
-        let (socket,addr) = listener.accept().await?;
-        log::info!("Received connection from: {}", addr);
-        match status_reporter::handle_connection(socket, &addr).await {
-            Ok(()) => {},
+        let tcp_stream = listener.accept().await;
+        match tcp_stream {
+            Ok((socket,addr)) => {
+                log::info!("Received connection from: {}", addr);
+                match status_reporter::handle_connection(socket, &addr).await {
+                    Ok(()) => {},
+                    Err(e) => {
+                        let stacktrace = e.backtrace();
+                        log::error!("Error serving {addr}\n{e}\n{stacktrace}")
+                    }
+                }
+                log::info!("Finished serving: {addr}");
+            }
             Err(e) => {
-                let stacktrace = e.backtrace();
-                log::error!("Error serving {addr}\n{e}\n{stacktrace}")
+                log::error!("Error accepting connection\n{}\n{:?}",e,e.source());
             }
         }
-        log::info!("Finished serving: {addr}");
+
     }
 }
