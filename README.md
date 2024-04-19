@@ -8,7 +8,16 @@ This program will:
 - Check the player count on the Minecraft server every minute, and - if there are no players for `inactivity_timer` minutes - shut down the EC2 instance
 - Spoof the Minecraft server protocol to allow users to check the status of the server from the Multiplayer screen and - if allowed to - start the EC2 instance
 
-## Assumptions
+## Building
+Using Rust `1.77.2` nightly:
+```
+git clone https://github.com/PfisterFactor/minecraft-watcher.git
+cd minecraft-watcher
+cargo +nightly build
+```
+## Requirements
+
+
 This program assumes:
 - Your Minecraft server is being hosted on an EC2 instance
     - Spot instances are supported
