@@ -39,12 +39,7 @@ struct Args {
     #[arg(long, value_parser, value_delimiter = ',')]
     usernames_allowed_to_start_server: Vec<String>
 }
-#[tokio::main]
-async fn main() -> Result<()> {
-    tracing_subscriber::fmt::init();
-    CLI_ARGS.get_or_try_init(|| async {Ok::<Args,!>(Args::parse())}).await?;
-    log::info!("Initializing Minecraft server status watcher");
-    server_watcher::start_watcher().await?;
+async fn server_reporter() -> Result<!> {
     log::info!("Initializing Minecraft server status reporter");
     let port = CLI_ARGS.get().unwrap().watcher_port;
     let listener = TcpListener::bind("0.0.0.0:".to_string() + &port.to_string()).await?;
@@ -69,4 +64,30 @@ async fn main() -> Result<()> {
         }
 
     }
+}
+#[tokio::main]
+async fn main() -> Result<()> {
+    tracing_subscriber::fmt::init();
+    CLI_ARGS.get_or_try_init(|| async {Ok::<Args,!>(Args::parse())}).await?;
+    log::info!("Initializing Minecraft server status watcher");
+    server_watcher::start_watcher().await.unwrap();
+    loop {
+        let server_reporter = tokio::spawn(async move {
+            server_reporter().await.unwrap();
+        }).await;
+        match server_reporter {
+            Ok(_) => {
+                log::warn!("Server reporter task exited without error");
+            }
+            Err(err) if err.is_panic() => {
+                log::error!("Server reporter task panicked!\n{}\n{:?}",err,err.source());
+            }
+            Err(err) => {
+                log::error!("Server reporter task errored!\n{}\n{:?}",err,err.source());
+            }
+        }
+        log::info!("Restarting server reporter task...");
+    }
+
+
 }
