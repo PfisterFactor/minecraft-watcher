@@ -7,6 +7,7 @@ A little command line program I whipped up to monitor my EC2 Minecraft Server an
 This program will:
 - Check the player count on the Minecraft server every minute, and - if there are no players for `inactivity_timer` minutes - shut down the EC2 instance
 - Spoof the Minecraft server protocol to allow users to check the status of the server from the Multiplayer screen and - if allowed to - start the EC2 instance
+- Minecraft Server v1.15.2 or greater
 
 ## Building
 Using Rust `1.77.2` nightly:
@@ -22,6 +23,7 @@ This program assumes:
 - Your Minecraft server is being hosted on an EC2 instance
     - Spot instances are supported
 - Your Minecraft server is configured to automatically startup when the instance starts
+- Minecraft server
 
 ## Example setup
 In my configuration, I have a two EC2 instances, `minecraft-server` and `minecraft-watcher`.
